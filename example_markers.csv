@@ -1,0 +1,66 @@
+cell_type,gene
+CD14+ Monocytes,FCN1
+CD14+ Monocytes,CD14
+CD16+ Monocytes,TCF7L2
+CD16+ Monocytes,FCGR3A
+CD16+ Monocytes,LYN
+cDC2,CST3
+cDC2,COTL1
+cDC2,LYZ
+cDC2,CLEC10A
+cDC2,FCER1A
+Erythroblast,MKI67
+Erythroblast,HBA1
+Erythroblast,HBB
+Proerythroblast,CDK6
+Proerythroblast,SYNGR1
+NK cells,GNLY
+NK cells,NKG7
+NK cells,CD247
+NK cells,FCER1G
+NK cells,TYROBP
+NK cells,KLRG1
+NK cells,FCGR3A
+ILC,ID2
+ILC,PLCG2
+ILC,GNLY
+ILC,SYNE1
+Naive B cells,MS4A1
+Naive B cells,IL4R
+Naive B cells,IGHD
+Naive B cells,FCRL1
+Naive B cells,IGHM
+B cells,MS4A1
+B cells,ITGB1
+B cells,COL4A4
+B cells,PRDM1
+B cells,IRF4
+B cells,PAX5
+B cells,BCL11A
+B cells,BLK
+Plasma cells,MZB1
+Plasma cells,HSP90B1
+Plasma cells,FNDC3B
+Plasma cells,PRDM1
+Plasma cells,IGKC
+Plasma cells,JCHAIN
+Plasmablast,XBP1
+Plasmablast,PRDM1
+CD4+ T cells,CD4
+CD4+ T cells,IL7R
+CD4+ T cells,TRBC2
+CD8+ T cells,CD8A
+CD8+ T cells,CD8B
+CD8+ T cells,GZMK
+CD8+ T cells,GZMA
+CD8+ T cells,CCL5
+CD8+ T cells,GZMB
+CD8+ T cells,GZMH
+T naive,LEF1
+T naive,CCR7
+T naive,TCF7
+pDC,GZMB
+pDC,IL3RA
+pDC,COBLL1
+pDC,TCF4
+

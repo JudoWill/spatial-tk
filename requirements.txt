@@ -1,0 +1,23 @@
+# Scanpy Clustering Tool Dependencies
+
+# Core single-cell analysis
+scanpy
+anndata
+
+# Data manipulation
+pandas
+numpy
+
+# Cell type annotation with enrichment analysis
+decoupler
+
+# Visualization
+matplotlib
+seaborn
+
+# Scientific computing
+scipy
+
+# Graph algorithms for clustering
+igraph
+leidenalg
