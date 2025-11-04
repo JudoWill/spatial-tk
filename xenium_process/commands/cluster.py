@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""
+Cluster command: Perform PCA, neighbor graph, UMAP, and Leiden clustering.
+"""
+
+import argparse
+import logging
+import sys
+from pathlib import Path
+
+from xenium_process.core.data_io import load_existing_spatial_data, save_spatial_data
+from xenium_process.core import clustering
+from xenium_process.core import plotting
+from xenium_process.utils.helpers import (
+    get_table, set_table, get_output_path, 
+    prepare_spatial_data_for_save, parse_resolutions
+)
+
+
+def add_arguments(parser: argparse.ArgumentParser) -> None:
+    """
+    Add arguments for the cluster command.
+    
+    Args:
+        parser: ArgumentParser to add arguments to
+    """
+    parser.add_argument(
+        '--input',
+        required=True,
+        help='Path to input normalized .zarr file'
+    )
+    parser.add_argument(
+        '--output',
+        help='Path to output .zarr file (required unless --inplace is used)'
+    )
+    parser.add_argument(
+        '--inplace',
+        action='store_true',
+        help='Modify the input file in place instead of creating a new file'
+    )
+    parser.add_argument(
+        '--leiden-resolution',
+        type=str,
+        default='0.5',
+        help='Leiden clustering resolution(s), comma-separated for multiple (default: 0.5)'
+    )
+    parser.add_argument(
+        '--save-plots',
+        action='store_true',
+        help='Generate and save UMAP plots'
+    )
+
+
+def main(args: argparse.Namespace) -> None:
+    """
+    Execute the cluster command.
+    
+    Args:
+        args: Parsed command-line arguments
+    """
+    logging.info("="*60)
+    logging.info("Xenium Process: Clustering Analysis")
+    logging.info("="*60)
+    
+    # Validate inputs
+    input_path = Path(args.input)
+    if not input_path.exists():
+        logging.error(f"Input file not found: {input_path}")
+        sys.exit(1)
+    
+    try:
+        output_path = get_output_path(args.input, args.output, args.inplace)
+        resolutions = parse_resolutions(args.leiden_resolution)
+    except ValueError as e:
+        logging.error(str(e))
+        sys.exit(1)
+    
+    try:
+        # Load spatial data
+        sdata = load_existing_spatial_data(input_path)
+        adata = get_table(sdata)
+        
+        if adata is None:
+            raise ValueError("No expression table found in spatial data")
+        
+        logging.info(f"Starting clustering: {adata.n_obs} cells × {adata.n_vars} genes")
+        
+        # Dimensionality reduction
+        adata = clustering.run_pca(adata)
+        adata = clustering.compute_neighbors_and_umap(adata)
+        
+        # Clustering at multiple resolutions
+        for resolution in resolutions:
+            res_str = str(resolution).replace(".", "p")
+            cluster_key = f"leiden_res{res_str}"
+            adata = clustering.cluster_leiden(adata, resolution, key_added=cluster_key)
+        
+        # Update the SpatialData table with processed AnnData
+        prepare_spatial_data_for_save(adata)
+        set_table(sdata, adata)
+        
+        # Save results
+        if args.inplace:
+            logging.info(f"Saving results in place: {output_path}")
+        else:
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            logging.info(f"Saving results to: {output_path}")
+        
+        save_spatial_data(sdata, output_path, overwrite=args.inplace)
+        
+        # Generate plots if requested
+        if args.save_plots:
+            plots_dir = output_path.parent / "plots"
+            plots_dir.mkdir(exist_ok=True)
+            
+            for resolution in resolutions:
+                res_str = str(resolution).replace(".", "p")
+                cluster_key = f"leiden_res{res_str}"
+                plotting.save_umap_plots(adata, plots_dir, cluster_key, None, resolution)
+        
+        logging.info("="*60)
+        logging.info(f"Clustering complete: {output_path}")
+        logging.info(f"Resolutions: {resolutions}")
+        logging.info("="*60)
+        
+    except Exception as e:
+        logging.error(f"Clustering failed: {e}", exc_info=True)
+        sys.exit(1)
+

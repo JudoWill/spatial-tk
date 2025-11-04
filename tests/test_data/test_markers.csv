@@ -1,0 +1,17 @@
+cell_type,gene
+T cells,CD3D
+T cells,CD3E
+T cells,CD3G
+B cells,MS4A1
+B cells,CD19
+B cells,CD79A
+Macrophages,CD68
+Macrophages,CD14
+Macrophages,FCGR3A
+NK cells,NCAM1
+NK cells,NKG7
+NK cells,GNLY
+Epithelial,EPCAM
+Epithelial,KRT8
+Epithelial,KRT18
+

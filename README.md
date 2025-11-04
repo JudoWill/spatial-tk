@@ -1,212 +1,392 @@
-# Scanpy Clustering Tool
+# Xenium Process: Spatial Transcriptomics Analysis Toolkit
 
-A comprehensive single-file Python tool for single-cell RNA-seq analysis. This script takes a single-cell sequencing dataset in h5 format and runs through a complete analysis workflow:
+A comprehensive modular Python toolkit for Xenium spatial transcriptomics analysis. This package provides a command-line interface with separate subcommands for each stage of the analysis pipeline, enabling flexible and efficient processing of spatial transcriptomics data.
 
-- **Quality Control** - Calculate QC metrics, filter cells and genes
-- **Preprocessing** - Normalization, log transformation, feature selection
-- **Dimensionality Reduction** - PCA and UMAP embedding
-- **Clustering** - Leiden clustering at multiple resolutions
-- **Cell Type Annotation** - Marker gene-based cell type assignment
+## Features
 
-The tool outputs a processed AnnData object (h5ad) and CSV files with cell type annotations for downstream analysis.
-
-This tool is an operational version of the Scverse basic tutorial:
-https://scverse-tutorials.readthedocs.io/en/latest/notebooks/basic-scrna-tutorial.html
+- **Modular Pipeline**: Each analysis step is a separate command for maximum flexibility
+- **Inplace Processing**: Optionally modify datasets without duplication to save disk space
+- **Multiple Resolutions**: Support for multi-resolution clustering analysis
+- **Rich Annotations**: Marker-based and ULM enrichment-based cell type annotation
+- **Flexible Differential Analysis**: Compare groups or find cluster markers
+- **Comprehensive Testing**: Unit and functional tests ensure reliability
 
 ## Installation
 
-Install dependencies using pip:
+### From Source
 
 ```bash
-pip install -r requirements.txt
+# Clone or navigate to the repository
+cd clustering-tools
+
+# Install in development mode (recommended)
+pip install -e .
+
+# Or install normally
+pip install .
 ```
 
-## Usage
+### Dependencies
 
-### Basic Usage
+The package requires Python ≥3.9 and includes dependencies for:
+- Spatial data handling (spatialdata, squidpy)
+- Single-cell analysis (scanpy, anndata)
+- Cell type annotation (decoupler)
+- Visualization (matplotlib, seaborn)
+- Clustering (igraph, leidenalg)
 
-Process a dataset with default parameters:
+See `pyproject.toml` for complete dependency list.
+
+## Quick Start
 
 ```bash
-python scanpy_cluster.py --input data.h5 --output-dir results/
+# 1. Concatenate multiple samples
+xenium_process concat --input samples.csv --output merged.zarr
+
+# 2. Normalize (inplace to save space)
+xenium_process normalize --input merged.zarr --inplace
+
+# 3. Cluster with multiple resolutions
+xenium_process cluster --input merged.zarr --inplace --leiden-resolution 0.2,0.5,1.0
+
+# 4. Annotate cell types
+xenium_process annotate --input merged.zarr --inplace --markers markers.csv
+
+# 5. Differential expression analysis
+xenium_process differential --input merged.zarr --output-dir results/ --groupby leiden_res0p5
 ```
 
-### With Marker-Based Annotation
+## Commands
 
-Annotate cell types using a marker gene CSV file:
+### `xenium_process concat`
+
+Concatenate multiple Xenium .zarr files into a single dataset.
 
 ```bash
-python scanpy_cluster.py \
-  --input data.h5 \
-  --output-dir results/ \
-  --markers example_markers.csv \
-  --save-plots
+xenium_process concat --input samples.csv --output merged.zarr
+
+# With downsampling for testing
+xenium_process concat --input samples.csv --output merged.zarr --downsample 0.1
 ```
 
-### Multiple Clustering Resolutions
+**Arguments:**
+- `--input`: Path to CSV file with columns: `sample`, `path`, [optional metadata]
+- `--output`: Path to output .zarr file
+- `--downsample`: Fraction of cells to keep (0-1, default: 1.0)
 
-Run clustering at multiple resolutions (comma-separated):
-
-```bash
-python scanpy_cluster.py \
-  --input data.h5 \
-  --output-dir results/ \
-  --leiden-resolution 0.2,0.5,1.0,2.0 \
-  --markers example_markers.csv
-```
-
-### Quick Testing with Downsampling
-
-Test the pipeline quickly on a subset of cells:
-
-```bash
-python scanpy_cluster.py \
-  --input data.h5 \
-  --output-dir results/ \
-  --downsample 0.1 \
-  --save-plots
-```
-
-### Resume from Existing Analysis
-
-Resume from a previously saved analysis, skipping already-computed steps:
-
-```bash
-python scanpy_cluster.py \
-  --input data.h5 \
-  --output-dir results/ \
-  --markers new_markers.csv \
-  --resume \
-  --save-plots
-```
-
-### All Options
-
-```bash
-python scanpy_cluster.py \
-  --input data.h5 \
-  --output-dir results/ \
-  --markers example_markers.csv \
-  --save-plots \
-  --min-genes 100 \
-  --min-cells 3 \
-  --n-top-genes 2000 \
-  --leiden-resolution 0.5 \
-  --downsample 1.0
-```
-
-## Command-Line Arguments
-
-### Required Arguments
-- `--input`: Path to input h5 or h5ad file
-- `--output-dir`: Directory where all output files will be saved
-
-### Optional Arguments
-- `--markers`: Path to CSV file with marker genes (format: `cell_type,gene`)
-- `--save-plots`: Flag to generate and save QC/analysis plots
-- `--min-genes`: Minimum genes per cell for filtering (default: 100)
-- `--min-cells`: Minimum cells per gene for filtering (default: 3)
-- `--n-top-genes`: Number of highly variable genes (default: 2000)
-- `--leiden-resolution`: Clustering resolution(s), comma-separated (default: 0.5)
-- `--downsample`: Fraction of cells to keep for analysis, 0-1 (default: 1.0 = no downsampling)
-- `--resume`: Resume from existing analysis, skip already-computed steps
-
-## Marker Gene CSV Format
-
-The marker gene file should be a CSV with two columns: `cell_type` and `gene`. Each row specifies one marker gene for a cell type. See `example_markers.csv` for a template:
-
+**CSV Format:**
 ```csv
-cell_type,gene
-B cells,MS4A1
-B cells,CD19
-T cells,CD3D
-T cells,CD3E
-NK cells,GNLY
-NK cells,NKG7
+sample,path,status,location
+sample1,/path/to/sample1.zarr,HIV,Drexel
+sample2,/path/to/sample2.zarr,NEG,OSU
+```
+
+### `xenium_process normalize`
+
+Perform QC, filtering, normalization, and feature selection.
+
+```bash
+# Save to new file
+xenium_process normalize --input data.zarr --output normalized.zarr
+
+# Modify in place
+xenium_process normalize --input data.zarr --inplace
+
+# With custom parameters and plots
+xenium_process normalize --input data.zarr --inplace \
+  --min-genes 200 \
+  --min-cells 5 \
+  --n-top-genes 3000 \
+  --save-plots
+```
+
+**Arguments:**
+- `--input`: Input .zarr file
+- `--output`: Output .zarr file (mutually exclusive with --inplace)
+- `--inplace`: Modify input file in place
+- `--min-genes`: Minimum genes per cell (default: 100)
+- `--min-cells`: Minimum cells per gene (default: 3)
+- `--n-top-genes`: Number of highly variable genes (default: 2000)
+- `--save-plots`: Generate QC plots
+
+### `xenium_process cluster`
+
+Perform PCA, neighbor graph computation, UMAP, and Leiden clustering.
+
+```bash
+# Single resolution
+xenium_process cluster --input data.zarr --inplace --leiden-resolution 0.5
+
+# Multiple resolutions with plots
+xenium_process cluster --input data.zarr --inplace \
+  --leiden-resolution 0.2,0.5,1.0,2.0 \
+  --save-plots
+```
+
+**Arguments:**
+- `--input`: Input normalized .zarr file
+- `--output`: Output .zarr file (mutually exclusive with --inplace)
+- `--inplace`: Modify input file in place
+- `--leiden-resolution`: Clustering resolution(s), comma-separated (default: 0.5)
+- `--save-plots`: Generate UMAP plots
+
+### `xenium_process annotate`
+
+Annotate cell types using marker genes and/or ULM scoring.
+
+```bash
+# Basic annotation with markers
+xenium_process annotate --input data.zarr --inplace --markers markers.csv
+
+# With ULM enrichment scores
+xenium_process annotate --input data.zarr --inplace \
+  --markers markers.csv \
+  --calculate-ulm \
+  --save-plots
+
+# Annotate specific clustering
+xenium_process annotate --input data.zarr --inplace \
+  --markers markers.csv \
+  --cluster-key leiden_res1p0
+```
+
+**Arguments:**
+- `--input`: Input clustered .zarr file
+- `--output`: Output .zarr file (mutually exclusive with --inplace)
+- `--inplace`: Modify input file in place
+- `--markers`: Path to marker genes CSV (columns: `cell_type`, `gene`)
+- `--cluster-key`: Specific cluster column to annotate (default: all leiden_res*)
+- `--calculate-ulm`: Calculate ULM enrichment scores for pathways/TFs
+- `--panglao-min-sensitivity`: Min sensitivity for PanglaoDB markers (default: 0.5)
+- `--save-plots`: Generate annotation plots
+
+**ULM Resources:**
+- **hallmark**: MSigDB Hallmark gene sets
+- **collectri**: CollecTRI TF regulons
+- **dorothea**: DoRothEA TF activities
+- **progeny**: PROGENy pathway activities
+- **PanglaoDB**: Filtered cell type markers
+
+### `xenium_process differential`
+
+Differential expression analysis with two modes:
+
+**Mode A**: Compare two specific groups (e.g., HIV vs NEG)
+**Mode B**: Find marker genes for all groups/clusters
+
+```bash
+# Mode B: Find markers for all clusters
+xenium_process differential \
+  --input data.zarr \
+  --output-dir results/ \
+  --groupby leiden_res0p5
+
+# Mode A: Compare two groups
+xenium_process differential \
+  --input data.zarr \
+  --output-dir results/ \
+  --groupby status \
+  --compare-groups HIV,NEG
+
+# With obsm enrichment scores
+xenium_process differential \
+  --input data.zarr \
+  --output-dir results/ \
+  --groupby status \
+  --compare-groups HIV,NEG \
+  --obsm-layer score_ulm_PanglaoDB \
+  --save-plots
+
+# Compare cell types
+xenium_process differential \
+  --input data.zarr \
+  --output-dir results/ \
+  --groupby cell_type_res0p5 \
+  --n-genes 50
+```
+
+**Arguments:**
+- `--input`: Input .zarr file with annotations
+- `--output-dir`: Directory for results
+- `--groupby`: Column in obs to group by (e.g., "leiden_res0p5", "status", "cell_type")
+- `--compare-groups`: Two groups to compare (Mode A), comma-separated
+- `--obsm-layer`: Optional obsm layer for enrichment analysis (e.g., "score_ulm_PanglaoDB")
+- `--method`: Statistical test method (default: wilcoxon)
+- `--layer`: Layer to use for expression (default: None uses .X)
+- `--n-genes`: Number of top genes to save (default: 100)
+- `--save-plots`: Generate differential analysis plots
+
+## Example Workflows
+
+### Full Pipeline (In-place to Save Space)
+
+```bash
+# Step 1: Concatenate samples
+xenium_process concat --input samples.csv --output data.zarr
+
+# Step 2-5: Process in place
+xenium_process normalize --input data.zarr --inplace --save-plots
+xenium_process cluster --input data.zarr --inplace --leiden-resolution 0.5,1.0 --save-plots
+xenium_process annotate --input data.zarr --inplace --markers markers.csv --calculate-ulm --save-plots
+xenium_process differential --input data.zarr --output-dir results/ --groupby leiden_res0p5 --save-plots
+```
+
+### Separate Files for Each Step
+
+```bash
+xenium_process concat --input samples.csv --output step1_concat.zarr
+xenium_process normalize --input step1_concat.zarr --output step2_normalized.zarr
+xenium_process cluster --input step2_normalized.zarr --output step3_clustered.zarr
+xenium_process annotate --input step3_clustered.zarr --output step4_annotated.zarr
+xenium_process differential --input step4_annotated.zarr --output-dir results/
+```
+
+### Compare Disease Status
+
+```bash
+# Process and normalize
+xenium_process concat --input samples.csv --output data.zarr
+xenium_process normalize --input data.zarr --inplace
+
+# Compare HIV vs NEG
+xenium_process differential \
+  --input data.zarr \
+  --output-dir hiv_vs_neg/ \
+  --groupby status \
+  --compare-groups HIV,NEG \
+  --save-plots
+```
+
+### Multi-Resolution Analysis
+
+```bash
+xenium_process concat --input samples.csv --output data.zarr
+xenium_process normalize --input data.zarr --inplace
+xenium_process cluster --input data.zarr --inplace --leiden-resolution 0.2,0.5,1.0,2.0
+
+# Annotate all resolutions
+xenium_process annotate --input data.zarr --inplace --markers markers.csv --save-plots
+
+# Differential analysis for each resolution
+for res in 0p2 0p5 1p0 2p0; do
+  xenium_process differential \
+    --input data.zarr \
+    --output-dir results_res${res}/ \
+    --groupby leiden_res${res}
+done
 ```
 
 ## Output Files
 
-The tool creates the following outputs in the specified output directory:
+### Concat
+- `{output}.zarr`: Concatenated spatial dataset
 
-### Data Files
-- `processed_data.h5ad`: Processed AnnData object with all analysis results
-- `cell_annotations_res{resolution}.csv`: Cell annotations for each resolution
-  - Columns: `cell_barcode`, `cluster`, `cell_type`
-  - One file per clustering resolution
+### Normalize
+- `{output}.zarr`: Normalized dataset with QC metrics
+- `plots/qc_*.png`: QC plots (if --save-plots)
 
-### Plot Files (if `--save-plots` is used)
-- `plots/qc_violin.png`: QC metrics violin plots
-- `plots/qc_scatter.png`: Total counts vs genes scatter plot
-- `plots/highly_variable_genes.png`: Highly variable genes dispersion
-- `plots/pca_variance_ratio.png`: PCA explained variance
-- `plots/umap_by_sample.png`: UMAP colored by sample (if available)
-- `plots/umap_leiden_res{resolution}.png`: UMAP colored by clusters
-- `plots/umap_celltype_res{resolution}.png`: UMAP colored by cell type
-- `plots/marker_dotplot_res{resolution}.png`: Marker gene expression dotplot
-- `plots/enrichment_scores_res{resolution}.png`: MLM enrichment score heatmap per cluster
+### Cluster
+- `{output}.zarr`: Dataset with clustering results
+- `plots/umap_leiden_res*.png`: UMAP plots (if --save-plots)
 
-## Example Workflow
+### Annotate
+- `{output}.zarr`: Dataset with cell type annotations
+- `plots/umap_celltype_res*.png`: Annotated UMAP plots (if --save-plots)
+- `plots/marker_dotplot_res*.png`: Marker expression dotplots
+- `plots/deg_*.png`: Differential expression plots
 
-1. Prepare your h5 data file
-2. (Optional) Create a marker gene CSV file
-3. Run the tool:
-   ```bash
-   python scanpy_cluster.py \
-     --input compiled.h5 \
-     --output-dir results/ \
-     --markers example_markers.csv \
-     --leiden-resolution 0.2,0.5,1.0 \
-     --save-plots
-   ```
-4. Review the output:
-   - Check QC plots in `results/plots/`
-   - Load `results/processed_data.h5ad` in Python for further analysis
-   - Use `results/cell_annotations_res*.csv` for downstream applications
+### Differential
+- `de_genes_*.csv`: Differential expression results
+- `de_{obsm_layer}_*.csv`: obsm enrichment results (if --obsm-layer used)
+- `plots/`: Visualization plots (if --save-plots)
 
-## Features
+## Development
 
-### Quality Control
-- Optional downsampling for quick testing on subset of cells
-- Calculates mitochondrial, ribosomal, and hemoglobin gene percentages
-- Filters low-quality cells and lowly-expressed genes
+### Running Tests
 
-### Preprocessing
-- Median normalization (log1p transformation)
-- Highly variable gene selection (batch-aware if multiple samples)
+```bash
+# Install with dev dependencies
+pip install -e ".[dev]"
 
-### Analysis
-- PCA dimensionality reduction
-- Nearest neighbor graph construction
-- UMAP embedding for visualization
-- Leiden clustering at customizable resolutions
+# Run all tests
+pytest
 
-### Cell Type Annotation
-- Marker gene-based annotation using decoupler's MLM (multivariate linear model)
-- Enrichment analysis approach tests if marker gene sets are enriched in cells
-- Uses decoupler's rankby_group to assign cell type with highest enrichment per cluster
-- Supports multiple clustering resolutions
+# Run only unit tests (fast)
+pytest tests/unit/
 
-### Logging
-- Detailed progress logging with timestamps
-- Summary statistics at each step
-- Error handling with informative messages
+# Run only functional tests (slower, requires test data)
+pytest tests/functional/
 
-### Resume Capability
-- Can resume from existing `processed_data.h5ad` file
-- Skips already-computed steps (QC, normalization, PCA, UMAP, clustering, annotation)
-- Useful for adding new clustering resolutions or annotations
-- Saves time when experimenting with parameters
+# Run with coverage
+pytest --cov=xenium_process --cov-report=html
+```
 
-## Requirements
+### Creating Test Data
 
-See `requirements.txt` for full dependencies. Key packages:
-- scanpy >= 1.9.0
-- anndata >= 0.9.0
-- decoupler >= 1.4.0
-- pandas >= 1.5.0
-- numpy >= 1.23.0
-- matplotlib >= 3.6.0
-- igraph >= 0.10.0
-- leidenalg >= 0.9.0
+```bash
+python scripts/create_test_data.py \
+  --input-csv example.csv \
+  --output-dir tests/test_data \
+  --n-cells 500
+```
 
+### Building Package
+
+```bash
+# Build distribution
+python -m build
+
+# Install locally
+pip install dist/xenium_process-*.whl
+```
+
+## Marker Gene CSV Format
+
+```csv
+cell_type,gene
+T cells,CD3D
+T cells,CD3E
+B cells,MS4A1
+B cells,CD19
+Macrophages,CD68
+Macrophages,CD14
+```
+
+## Advanced Usage
+
+### Python API
+
+The package can also be used programmatically:
+
+```python
+from xenium_process.core import data_io, preprocessing, clustering, annotation
+from xenium_process.utils.helpers import get_table, set_table
+
+# Load data
+sdata = data_io.load_existing_spatial_data("data.zarr")
+adata = get_table(sdata)
+
+# Process
+adata = preprocessing.normalize_and_log(adata)
+adata = clustering.run_pca(adata)
+adata = clustering.compute_neighbors_and_umap(adata)
+adata = clustering.cluster_leiden(adata, resolution=0.5)
+
+# Save
+set_table(sdata, adata)
+data_io.save_spatial_data(sdata, "processed.zarr")
+```
+
+## Citation
+
+This tool is based on the Scverse ecosystem and follows best practices from:
+- [Scverse Basic Tutorial](https://scverse-tutorials.readthedocs.io/en/latest/notebooks/basic-scrna-tutorial.html)
+- [Decoupler documentation](https://decoupler.readthedocs.io/)
+
+## License
+
+MIT License
+
+## Support
+
+For issues, questions, or contributions, please contact the Hope Lab or open an issue on GitHub.

@@ -1,9 +1,69 @@
 # Changelog
 
-All notable changes to the Scanpy Single-Cell RNA-seq Clustering and Annotation Tool will be documented in this file.
+All notable changes to the Xenium Spatial Clustering and Annotation Tool will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] - 2025-10-28
+
+### Major Refactor - Xenium Spatial Data Support
+
+This is a major rewrite transforming the tool from single-cell RNA-seq to Xenium spatial transcriptomics analysis.
+
+### Added
+- **Xenium Spatial Data Support**:
+  - Load and concatenate multiple Xenium .zarr datasets
+  - CSV input format with sample metadata (sample, path, optional columns)
+  - SpatialData integration for spatial coordinate preservation
+  - Output as .zarr format preserving spatial information
+- **Modular Architecture**:
+  - Refactored ~1000 line monolithic script into organized modules:
+    - `data_io.py`: Data loading, concatenation, and saving
+    - `preprocessing.py`: QC, filtering, normalization, HVG selection
+    - `clustering.py`: PCA, neighbors, UMAP, Leiden clustering
+    - `annotation.py`: Marker loading, cell type annotation, ULM scores, DE analysis
+    - `plotting.py`: All visualization functions
+    - `main.py`: CLI and workflow orchestration
+- **ULM Enrichment Scoring**:
+  - Pre-calculate ULM scores for pathway/TF resources via `--calculate-ulm` flag
+  - Resources included: hallmark, collectri, dorothea, progeny, PanglaoDB
+  - PanglaoDB markers filtered by canonical status and sensitivity (default: >0.5)
+  - Scores stored in `adata.obsm['score_ulm_{resource}']`
+  - Configurable PanglaoDB sensitivity via `--panglao-min-sensitivity`
+- **Enhanced Dependencies**:
+  - Added `spatialdata` for spatial data handling
+  - Added `squidpy` for future spatial analysis features
+- **Multi-sample Support**:
+  - Automatic sample concatenation with metadata preservation
+  - Sample-aware batch correction in HVG selection
+  - UMAP visualization colored by sample
+
+### Changed
+- **Input Format**: Now accepts CSV file with sample paths instead of single h5ad file
+- **Output Format**: Saves processed data as .zarr SpatialData object instead of h5ad
+- **Main Script**: Renamed from `scanpy_cluster.py` to `main.py` (legacy script preserved)
+- **Cell Type Annotation**: Updated to use latest decoupler API:
+  - `dc.run_mlm()` instead of `dc.mt.mlm()`
+  - `dc.get_acts()` instead of `dc.pp.get_obsm()`
+  - `dc.rank_sources_groups()` instead of `dc.tl.rankby_group()`
+- **Documentation**: Completely rewritten README for Xenium workflow
+
+### Maintained
+- All existing features from v0.2.0:
+  - Quality control and filtering
+  - Normalization and feature selection
+  - PCA, UMAP, Leiden clustering
+  - Differential expression analysis
+  - Cell type annotation with markers
+  - Resume functionality
+  - Downsampling
+  - Multiple clustering resolutions
+  - Comprehensive plotting
+
+### Notes
+- Legacy `scanpy_cluster.py` remains available for h5ad single-cell workflows
+- Spatial-specific analyses (spatial autocorrelation, niche detection, etc.) planned for future releases
 
 ## [0.2.0] - 2025-10-22
 

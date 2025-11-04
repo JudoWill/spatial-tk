@@ -1,0 +1,98 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xenium-process"
+version = "0.1.0"
+description = "A comprehensive toolkit for analyzing Xenium spatial transcriptomics data"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Hope Lab", email = "hope@lab.edu"}
+]
+keywords = ["spatial transcriptomics", "xenium", "single-cell", "bioinformatics"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    # Spatial data handling
+    "spatialdata",
+    "squidpy",
+    
+    # Core single-cell analysis
+    "scanpy",
+    "anndata",
+    
+    # Data manipulation
+    "pandas",
+    "numpy",
+    
+    # Cell type annotation with enrichment analysis
+    "decoupler",
+    
+    # Visualization
+    "matplotlib",
+    "seaborn",
+    
+    # Scientific computing
+    "scipy",
+    
+    # Graph algorithms for clustering
+    "igraph",
+    "leidenalg",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+    "black",
+    "flake8",
+    "mypy",
+]
+
+[project.scripts]
+xenium_process = "xenium_process.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/hope-lab/xenium-process"
+Repository = "https://github.com/hope-lab/xenium-process"
+Documentation = "https://github.com/hope-lab/xenium-process/blob/main/README.md"
+
+[tool.setuptools]
+packages = ["xenium_process", "xenium_process.commands", "xenium_process.core", "xenium_process.utils"]
+
+[tool.setuptools.package-data]
+xenium_process = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --tb=short"
+# Use custom temp directory to avoid filling up /tmp
+# This directory should be on a partition with more space
+tmp_path_retention_count = 0
+tmp_path_retention_policy = "none"
+
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311', 'py312']
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+

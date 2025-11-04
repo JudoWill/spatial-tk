@@ -1,0 +1,5 @@
+sample,path,status,location
+Drexel-Pos,../xenium_datasets/output-XETG00217__0041105__HIV-NEG-NS14-916__20251002__151302.zarr,sHIV,Drexel
+Drexel-Neg,../xenium_datasets/output-XETG00217__0041105__HIV-POS-DS14-6872__20251002__151303.zarr,NEG,Drexel
+OSU-Pos,../xenium_datasets/output-XETG00217__0067798__s524206__20251002__151303.zarr,HIV,OSU
+OSU-Neg,../xenium_datasets/output-XETG00217__0067798__s164820__20251002__151303.zarr,NEG,OSU

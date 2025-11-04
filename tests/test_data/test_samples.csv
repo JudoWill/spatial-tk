@@ -1,0 +1,5 @@
+sample,path,status,location
+Drexel-Pos,tests/test_data/subsampled_Drexel-Pos.zarr,HIV,Drexel
+Drexel-Neg,tests/test_data/subsampled_Drexel-Neg.zarr,NEG,Drexel
+OSU-Pos,tests/test_data/subsampled_OSU-Pos.zarr,HIV,OSU
+OSU-Neg,tests/test_data/subsampled_OSU-Neg.zarr,NEG,OSU

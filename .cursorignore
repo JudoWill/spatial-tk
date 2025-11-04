@@ -1,3 +1,87 @@
+# Cursor AI should ignore these files/directories for indexing
+
+# Virtual environments - large and not useful for AI context
 venv/
-results*/
-*.h5*
+env/
+.venv/
+ENV/
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Test coverage and reports
+htmlcov/
+.coverage
+.pytest_cache/
+.pytest_tmp/
+.tox/
+.nox/
+
+# Large data files - not useful for code context
+*.zarr
+*.h5ad
+*.h5
+*.hdf5
+*.loom
+*.parquet
+compiled.h5
+
+# Test data directories
+tests/test_data/*.zarr
+tests/test_data/subsampled_*.zarr
+
+# Results and output directories
+results/
+results_*/
+spatial_pdac_full/
+results_full_pdac/
+output/
+plots/
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+*.ipynb_checkpoints/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Large notebook outputs (keep notebooks, ignore if they get too large)
+# Uncomment if notebooks become problematic:
+# *.ipynb
+
+# Git directory
+.git/
+
+# Documentation build
+docs/_build/
+
+# Node modules (if any frontend tools added)
+node_modules/

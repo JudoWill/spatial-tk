@@ -1,4 +1,8 @@
-# Scanpy Clustering Tool Dependencies
+# Xenium Spatial Clustering Tool Dependencies
+
+# Spatial data handling
+spatialdata
+squidpy
 
 # Core single-cell analysis
 scanpy
