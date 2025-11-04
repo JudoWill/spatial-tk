@@ -5,6 +5,51 @@ All notable changes to the Xenium Spatial Clustering and Annotation Tool will be
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-11-04
+
+### Added
+- **TOML Configuration File Support**:
+  - All commands now accept an optional `--config` argument for TOML configuration files
+  - Each command reads its own section from the config file (`[concat]`, `[normalize]`, `[cluster]`, `[annotate]`, `[differential]`)
+  - Config values can be overridden by CLI arguments for maximum flexibility
+  - Automatic type conversion for config values (strings to ints/floats/bools)
+  - Support for underscore/hyphen key mapping (e.g., `min_genes` in config maps to `--min-genes` CLI arg)
+- **Makefile Run Target**:
+  - New `make run ROOT=/path/to/directory` target for running full pipeline
+  - Executes all five pipeline steps sequentially using a single config file
+  - Validates config file existence and stops on any step failure
+  - Changes working directory to ROOT for relative path resolution
+- **Configuration Documentation**:
+  - `example_config.toml` - Complete example with all command sections documented
+  - `notes/TOML_CONFIG_GUIDE.md` - Comprehensive guide to TOML config files
+  - `notes/MAKEFILE_RUN_TARGET.md` - Documentation for the make run target
+- **Config Utility Module**:
+  - `xenium_process/utils/config.py` with `load_config()` and `merge_config_with_args()` functions
+  - Uses Python 3.11+ built-in `tomllib` module (no additional dependencies)
+  - Handles config loading, merging with CLI args, and type conversion
+
+### Changed
+- **Command Argument Handling**:
+  - Required arguments (`--input`, `--output`, etc.) are now optional when `--config` is provided
+  - Arguments are validated after config merge instead of during argparse parsing
+  - Clear error messages when required values are missing from both CLI and config
+- **CLI Behavior**:
+  - Commands can now be run with only `--config` argument when all required parameters are in config file
+  - CLI arguments always override config values (standard precedence)
+  - Config files support relative paths resolved from config file location
+
+### Testing
+- **Unit Tests**:
+  - `tests/unit/test_config.py` - Tests for config loading, merging, and type conversion
+- **Functional Tests**:
+  - `tests/functional/test_config_integration.py` - Integration tests for config files with all commands
+  - Tests verify config values override defaults, CLI overrides config, and error handling
+
+### Documentation
+- Updated README.md with configuration file section
+- Added examples of using config files in workflows
+- Documented config key naming conventions (underscores vs hyphens)
+
 ## [1.0.0] - 2025-10-28
 
 ### Major Refactor - Xenium Spatial Data Support
