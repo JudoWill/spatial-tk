@@ -7,7 +7,7 @@ A comprehensive modular Python toolkit for Xenium spatial transcriptomics analys
 - **Modular Pipeline**: Each analysis step is a separate command for maximum flexibility
 - **Inplace Processing**: Optionally modify datasets without duplication to save disk space
 - **Multiple Resolutions**: Support for multi-resolution clustering analysis
-- **Rich Annotations**: Marker-based and ULM enrichment-based cell type annotation
+- **Rich Annotations**: Marker-based and MLM enrichment-based cell type annotation
 - **Flexible Differential Analysis**: Compare groups or find cluster markers
 - **Configuration Files**: TOML config files for reproducible pipelines
 - **Comprehensive Testing**: Unit and functional tests ensure reliability
@@ -205,13 +205,13 @@ xenium_process cluster --input data.zarr --inplace \
 
 ### `xenium_process annotate`
 
-Annotate cell types using marker genes and/or ULM scoring.
+Annotate cell types using marker genes and/or MLM scoring.
 
 ```bash
 # Basic annotation with markers
 xenium_process annotate --input data.zarr --inplace --markers markers.csv
 
-# With ULM enrichment scores
+# With MLM enrichment scores
 xenium_process annotate --input data.zarr --inplace \
   --markers markers.csv \
   --calculate-ulm \
@@ -229,13 +229,13 @@ xenium_process annotate --input data.zarr --inplace \
 - `--inplace`: Modify input file in place
 - `--markers`: Path to marker genes CSV (columns: `cell_type`, `gene`)
 - `--cluster-key`: Specific cluster column to annotate (default: all leiden_res*)
-- `--calculate-ulm`: Calculate ULM enrichment scores for pathways/TFs
+- `--calculate-ulm`: Calculate MLM enrichment scores for pathways/TFs
 - `--panglao-min-sensitivity`: Min sensitivity for PanglaoDB markers (default: 0.5)
 - `--tmin`: Minimum marker genes per cell type (default: 2)
 - `--save-plots`: Generate annotation plots
 - `--config`: Path to TOML configuration file (optional)
 
-**ULM Resources:**
+**MLM Resources:**
 - **hallmark**: MSigDB Hallmark gene sets
 - **collectri**: CollecTRI TF regulons
 - **dorothea**: DoRothEA TF activities
@@ -269,7 +269,7 @@ xenium_process differential \
   --output-dir results/ \
   --groupby status \
   --compare-groups HIV,NEG \
-  --obsm-layer score_ulm_PanglaoDB \
+  --obsm-layer score_mlm_PanglaoDB \
   --save-plots
 
 # Compare cell types
@@ -285,7 +285,7 @@ xenium_process differential \
 - `--output-dir`: Directory for results
 - `--groupby`: Column in obs to group by (e.g., "leiden_res0p5", "status", "cell_type")
 - `--compare-groups`: Two groups to compare (Mode A), comma-separated
-- `--obsm-layer`: Optional obsm layer for enrichment analysis (e.g., "score_ulm_PanglaoDB")
+- `--obsm-layer`: Optional obsm layer for enrichment analysis (e.g., "score_mlm_PanglaoDB")
 - `--method`: Statistical test method (default: wilcoxon)
 - `--layer`: Layer to use for expression (default: None uses .X)
 - `--n-genes`: Number of top genes to save (default: 100)

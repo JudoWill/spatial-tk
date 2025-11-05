@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Annotate command: Perform cell type annotation using marker genes and/or ULM scoring.
+Annotate command: Perform cell type annotation using marker genes and/or MLM scoring.
 """
 
 import argparse
@@ -51,19 +51,19 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         '--calculate-ulm',
         action='store_true',
-        help='Pre-calculate ULM enrichment scores for pathway/TF resources'
+        help='Pre-calculate MLM enrichment scores for pathway/TF resources'
     )
     parser.add_argument(
         '--panglao-min-sensitivity',
         type=float,
         default=0.5,
-        help='Minimum sensitivity for PanglaoDB markers in ULM (default: 0.5)'
+        help='Minimum sensitivity for PanglaoDB markers in MLM (default: 0.5)'
     )
     parser.add_argument(
         '--tmin',
         type=int,
         default=2,
-        help='Minimum number of marker genes per cell type for ULM annotation (default: 2)'
+        help='Minimum number of marker genes per cell type for MLM annotation (default: 2)'
     )
     parser.add_argument(
         '--save-plots',
@@ -126,9 +126,9 @@ def main(args: argparse.Namespace) -> None:
         
         logging.info(f"Starting annotation: {adata.n_obs} cells × {adata.n_vars} genes")
         
-        # Calculate ULM enrichment scores if requested (before annotation)
+        # Calculate MLM enrichment scores if requested (before annotation)
         if args.calculate_ulm:
-            adata = annotation.calculate_ulm_scores(
+            adata = annotation.calculate_mlm_scores(
                 adata,
                 use_panglao=True,
                 panglao_min_sensitivity=args.panglao_min_sensitivity

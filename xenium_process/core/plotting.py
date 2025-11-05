@@ -265,7 +265,18 @@ def create_enrichment_heatmap(
         cluster_key: Key in adata.obs containing cluster assignments
         resolution: Clustering resolution (for filename)
     """
-    if "mlm_estimate" not in adata.obsm:
+    # Check for MLM scores from marker-based annotation (score_mlm)
+    # or from resource-based scoring (score_mlm_*)
+    mlm_key = None
+    if "score_mlm" in adata.obsm:
+        mlm_key = "score_mlm"
+    else:
+        # Look for any score_mlm_* key
+        mlm_keys = [k for k in adata.obsm.keys() if k.startswith("score_mlm_")]
+        if mlm_keys:
+            mlm_key = mlm_keys[0]  # Use first available
+    
+    if mlm_key is None:
         logging.warning("MLM scores not found in adata.obsm, skipping enrichment heatmap")
         return
     
@@ -273,7 +284,7 @@ def create_enrichment_heatmap(
     
     try:
         # Extract MLM scores
-        acts = dc.get_acts(adata, obsm_key="mlm_estimate")
+        acts = dc.pp.get_obsm(adata, mlm_key)
         
         # Get cell types (column names from MLM scores)
         cell_types = acts.var_names.tolist()

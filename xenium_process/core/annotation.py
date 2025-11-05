@@ -3,7 +3,7 @@
 Cell type annotation and enrichment scoring functions.
 
 This module handles marker-based cell type annotation using decoupler,
-differential expression analysis, and ULM score calculation for
+differential expression analysis, and MLM score calculation for
 multiple pathway/TF resources.
 """
 
@@ -143,11 +143,11 @@ def annotate_with_markers(
     
     # Run multivariate linear model
     # This calculates enrichment scores for each cell type in each cell
-    dc.mt.ulm(adata, net=marker_df, verbose=False, tmin=tmin)
+    dc.mt.mlm(adata, net=marker_df, verbose=False, tmin=tmin)
     
     # Extract the MLM scores from adata.obsm
     # This creates a new AnnData-like object with cells x cell_types
-    acts = dc.pp.get_obsm(adata, "score_ulm")
+    acts = dc.pp.get_obsm(adata, "score_mlm")
     
     # For each cluster, find the cell type with highest enrichment score
     # Use decoupler's rankby_group to get top scoring cell type per cluster
@@ -182,7 +182,7 @@ def annotate_with_markers(
     return adata
 
 
-def calculate_ulm_scores(
+def calculate_mlm_scores(
     adata: ad.AnnData,
     use_panglao: bool = True,
     panglao_min_sensitivity: float = 0.5,
@@ -190,7 +190,7 @@ def calculate_ulm_scores(
     resume: bool = False
 ) -> ad.AnnData:
     """
-    Pre-calculate ULM scores for multiple decoupler resources.
+    Pre-calculate MLM scores for multiple decoupler resources.
     
     Resources include:
     - hallmark: Hallmark gene sets
@@ -199,7 +199,7 @@ def calculate_ulm_scores(
     - progeny: Pathway activity
     - PanglaoDB: Cell type markers (optional, filtered)
     
-    Scores are stored in adata.obsm[f'score_ulm_{resource}']
+    Scores are stored in adata.obsm[f'score_mlm_{resource}']
     
     Args:
         adata: AnnData object with normalized data
@@ -209,9 +209,9 @@ def calculate_ulm_scores(
         resume: If True, skip resources that already have scores
         
     Returns:
-        AnnData object with ULM scores added to obsm
+        AnnData object with MLM scores added to obsm
     """
-    logging.info("Calculating ULM scores for pathway/TF resources")
+    logging.info("Calculating MLM scores for pathway/TF resources")
     
     # Define resources using decoupler omnipath API (dc.op.*)
     resources = [
@@ -229,31 +229,31 @@ def calculate_ulm_scores(
         )
         resources.append(('PanglaoDB', panglao))
     
-    # Calculate ULM for each resource
+    # Calculate MLM for each resource
     for name, resource in resources:
-        obsm_key = f'score_ulm_{name}'
+        obsm_key = f'score_mlm_{name}'
         
         if resume and obsm_key in adata.obsm:
-            logging.info(f"  ULM scores for {name} already calculated (resuming)")
+            logging.info(f"  MLM scores for {name} already calculated (resuming)")
             continue
         
-        logging.info(f"  Calculating ULM for {name}")
+        logging.info(f"  Calculating MLM for {name}")
         
         try:
-            # Run ULM
-            dc.mt.ulm(data=adata, net=resource, tmin=tmin)
+            # Run MLM
+            dc.mt.mlm(data=adata, net=resource, tmin=tmin)
             
             # Store in named obsm key
-            adata.obsm[obsm_key] = adata.obsm['score_ulm'].copy()
+            adata.obsm[obsm_key] = adata.obsm['score_mlm'].copy()
             
             # Get shape info
             n_sources = adata.obsm[obsm_key].shape[1] if len(adata.obsm[obsm_key].shape) > 1 else 1
             logging.info(f"    Calculated scores for {n_sources} sources")
             
         except Exception as e:
-            logging.warning(f"  Failed to calculate ULM for {name}: {e}")
+            logging.warning(f"  Failed to calculate MLM for {name}: {e}")
     
-    logging.info("ULM score calculation complete")
+    logging.info("MLM score calculation complete")
     return adata
 
 

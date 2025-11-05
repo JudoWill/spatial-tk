@@ -65,7 +65,7 @@ Five independent subcommands replace the monolithic script:
 
 #### `xenium_process annotate`
 - Marker-based cell type annotation
-- Optional ULM enrichment scoring (hallmark, collectri, dorothea, progeny, PanglaoDB)
+- Optional MLM enrichment scoring (hallmark, collectri, dorothea, progeny, PanglaoDB)
 - Supports `--inplace`
 - **Input:** Clustered .zarr
 - **Output:** Annotated .zarr (new file or in-place)
@@ -74,7 +74,7 @@ Five independent subcommands replace the monolithic script:
 - Two modes:
   - **Mode A:** Compare two specific groups (e.g., HIV vs NEG)
   - **Mode B:** Find marker genes for all clusters/groups
-- Supports obsm layer analysis (e.g., ULM scores)
+- Supports obsm layer analysis (e.g., MLM scores)
 - **Input:** Annotated .zarr
 - **Output:** CSV files and plots in output directory
 
@@ -94,7 +94,7 @@ xenium_process normalize --input raw.zarr --output normalized.zarr
 
 #### Enhanced Differential Analysis
 - Compare arbitrary groups from any obs column
-- Analyze obsm embeddings (e.g., ULM enrichment scores)
+- Analyze obsm embeddings (e.g., MLM enrichment scores)
 - Both pairwise comparisons and marker finding
 
 ### 4. Testing Infrastructure

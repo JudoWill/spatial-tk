@@ -56,11 +56,11 @@ markers = "markers.csv"
 # Cluster column key to use for annotation (e.g., "leiden_res0p5")
 # If null, will use all leiden_res* columns found
 cluster_key = null
-# Pre-calculate ULM enrichment scores for pathway/TF resources
+# Pre-calculate MLM enrichment scores for pathway/TF resources
 calculate_ulm = true
-# Minimum sensitivity for PanglaoDB markers in ULM (default: 0.5)
+# Minimum sensitivity for PanglaoDB markers in MLM (default: 0.5)
 panglao_min_sensitivity = 0.5
-# Minimum number of marker genes per cell type for ULM annotation
+# Minimum number of marker genes per cell type for MLM annotation
 tmin = 2
 # Generate and save annotation plots
 save_plots = true
@@ -77,7 +77,7 @@ groupby = "leiden_res0p5"
 # E.g., "HIV,NEG". If null, finds markers for all groups (Mode B)
 compare_groups = null
 # Optional obsm layer to use for enrichment-based differential analysis
-# (e.g., "score_ulm_PanglaoDB")
+# (e.g., "score_mlm_PanglaoDB")
 obsm_layer = null
 # Statistical test method for gene expression DE
 # Options: "wilcoxon", "t-test", "logreg"

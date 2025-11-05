@@ -93,7 +93,7 @@ Examples:
     annotate_parser = subparsers.add_parser(
         'annotate',
         help='Annotate cell types',
-        description='Perform cell type annotation using marker genes and/or ULM scoring'
+        description='Perform cell type annotation using marker genes and/or MLM scoring'
     )
     annotate.add_arguments(annotate_parser)
     annotate_parser.set_defaults(func=annotate.main)

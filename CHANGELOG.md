@@ -5,6 +5,22 @@ All notable changes to the Xenium Spatial Clustering and Annotation Tool will be
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-11-05
+
+### Changed
+- **Enrichment Scoring Method**: Switched from Univariate Linear Model (ULM) to Multivariate Linear Model (MLM)
+  - All enrichment scoring now uses `dc.mt.mlm()` instead of `dc.mt.ulm()`
+  - Function renamed: `calculate_ulm_scores()` → `calculate_mlm_scores()`
+  - Obsm keys updated: `score_ulm_{resource}` → `score_mlm_{resource}`
+  - MLM provides more accurate activity estimates by accounting for correlated regulators and their interactions
+  - CLI flag `--calculate-ulm` retained for backward compatibility (still calculates MLM scores)
+- **Plotting**: Updated enrichment heatmap function to correctly detect MLM score keys in obsm
+
+### Documentation
+- Added `notes/ULM_vs_MLM.md` with detailed explanation of differences and toy example
+- Updated all documentation references from ULM to MLM
+- Updated configuration file examples and help text
+
 ## [1.1.0] - 2025-11-04
 
 ### Added

@@ -52,7 +52,7 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         '--obsm-layer',
-        help='Optional obsm layer to use for enrichment-based differential analysis (e.g., "score_ulm_PanglaoDB")'
+        help='Optional obsm layer to use for enrichment-based differential analysis (e.g., "score_mlm_PanglaoDB")'
     )
     parser.add_argument(
         '--method',
@@ -172,12 +172,12 @@ def perform_obsm_de(
     n_top: int = 50
 ) -> None:
     """
-    Perform differential analysis on obsm embeddings (e.g., ULM scores).
+    Perform differential analysis on obsm embeddings (e.g., MLM scores).
     
     Args:
         adata: AnnData object
         groupby: Column to group by
-        obsm_layer: Name of obsm layer (e.g., "score_ulm_PanglaoDB")
+        obsm_layer: Name of obsm layer (e.g., "score_mlm_PanglaoDB")
         compare_groups: Optional list of 2 groups to compare
         output_dir: Output directory
         n_top: Number of top features to report
