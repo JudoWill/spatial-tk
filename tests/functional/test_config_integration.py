@@ -40,18 +40,18 @@ markers = "markers.csv"
 score_key = "custom"
 method = "mlm"
 tmin = 3
-preset_resources = null
+preset_resources = ""
 panglao_min_sensitivity = 0.6
 panglao_canonical_only = true
-filter_obs = null
+filter_obs = ""
 save_plots = false
 
 [assign]
 input = "config_scored.zarr"
 output = "config_annotated.zarr"
 score_key = "score_mlm_custom"
-cluster_key = null
-annotation_key = null
+cluster_key = ""
+annotation_key = ""
 strategy = "top_positive"
 run_de = true
 save_plots = false
