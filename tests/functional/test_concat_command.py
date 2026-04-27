@@ -24,6 +24,7 @@ def test_concat_command(test_samples_csv, tmp_zarr_cleanup):
     
     # Check that command succeeded
     assert result.returncode == 0, f"Command failed: {result.stderr}"
+    assert "Expected an iterable of integers" not in result.stderr
     
     # Check that output file was created
     assert output_path.exists()
@@ -37,6 +38,16 @@ def test_concat_command(test_samples_csv, tmp_zarr_cleanup):
     table = get_table(sdata)
     assert table is not None
     assert table.n_obs > 0
+    assert "sample" in table.obs
+    assert table.obs["sample"].nunique() >= 1
+
+    # Labels are optional in concat output, but if present they should be readable.
+    if getattr(sdata, "labels", None):
+        first_label = next(iter(sdata.labels.values()))
+        first_scale = next(iter(first_label.keys()))
+        image_da = first_label[first_scale].ds["image"]
+        assert image_da.shape[0] > 0
+        assert image_da.shape[1] > 0
 
 
 def test_concat_with_downsampling(test_samples_csv, tmp_zarr_cleanup):

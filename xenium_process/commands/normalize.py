@@ -142,10 +142,13 @@ def main(args: argparse.Namespace) -> None:
         
         # Save results
         if args.inplace:
-            # Save table directly without loading SpatialData
+            # Persist through SpatialData writer to preserve table metadata/schema.
+            set_table(sdata, adata)
             logging.info(f"Saving results in place: {output_path}")
-            save_table_only(adata, output_path, overwrite=True)
+            save_spatial_data(sdata, output_path, overwrite=True)
         else:
+            # Reload SpatialData to attach updated table before writing a new output store.
+            sdata = load_existing_spatial_data(input_path, load_images=False)
             set_table(sdata, adata)
             output_path.parent.mkdir(parents=True, exist_ok=True)
             logging.info(f"Saving results to: {output_path}")
