@@ -232,6 +232,40 @@ spatial-tk spatial_neighbors --input data.zarr --output neighbors.zarr \
 - `--key-added`: Output prefix in `adata.obsp`/`adata.uns` (default: `spatial`)
 - `--config`: Path to TOML configuration file (optional)
 
+### `spatial-tk spatial_cluster`
+
+Cluster cells into spatial neighborhoods based on local cell-type composition vectors.
+
+```bash
+# Use existing spatial graph and choose best K by silhouette
+spatial-tk spatial_cluster --input data.zarr --inplace \
+  --cell-type-key cell_type_res0p5 --max-clusters 20
+
+# Force final cluster count while still saving full K sweep
+spatial-tk spatial_cluster --input data.zarr --inplace \
+  --cell-type-key cell_type_res0p5 --force-n-clusters 12
+```
+
+**Arguments:**
+- `--input`: Input .zarr file
+- `--output`: Output .zarr file (mutually exclusive with --inplace)
+- `--inplace`: Modify input file in place
+- `--table-key`: Optional table key in `SpatialData.tables`
+- `--cell-type-key`: Required `adata.obs` column with cell-type labels
+- `--connectivities-key`: `adata.obsp` graph key (default: `spatial_connectivities`)
+- `--neighbor-k`: Compute neighbors on demand if `--connectivities-key` is missing
+- `--spatial-key`: Coordinate key for on-demand neighbor calculation (default: `spatial`)
+- `--library-key`: Optional obs library key for on-demand neighbors
+- `--output-key`: Output obs column for selected labels (default: `spatial_cluster`)
+- `--results-key`: `adata.uns` key for detailed outputs (default: `spatial_cluster`)
+- `--min-clusters`: Minimum cluster count to test (default: 2)
+- `--max-clusters`: Maximum cluster count to test (default: 20)
+- `--force-n-clusters`: Force final selected cluster count
+- `--random-state`: Random seed for reproducibility (default: 0)
+- `--include-self`/`--exclude-self`: Include/exclude focal cell in neighborhood window
+- `--normalize-composition`/`--raw-composition`: Store proportions or raw counts
+- `--config`: Path to TOML configuration file (optional)
+
 ### `spatial-tk annotate`
 
 Annotate cell types using marker genes and/or MLM scoring.

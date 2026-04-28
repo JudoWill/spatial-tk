@@ -19,6 +19,7 @@ from spatial_tk.commands import (
     cluster,
     quantitate,
     spatial_neighbors,
+    spatial_cluster,
     assign,
     differential,
 )
@@ -62,6 +63,10 @@ Examples:
   # Build a Squidpy spatial neighbors graph
   spatial-tk spatial_neighbors --input clustered.zarr --inplace \\
       --spatial-key spatial --n-neighs 8 --transform cosine
+
+  # Cluster neighborhood compositions from spatial neighbor graph
+  spatial-tk spatial_cluster --input clustered.zarr --inplace \\
+      --cell-type-key cell_type_res0p5 --max-clusters 20
 
   # Differential analysis between groups
   spatial-tk differential --input annotated.zarr --output-dir results/ \\
@@ -137,6 +142,18 @@ Examples:
     )
     spatial_neighbors.add_arguments(spatial_neighbors_parser)
     spatial_neighbors_parser.set_defaults(func=spatial_neighbors.main)
+
+    # Add spatial_cluster subcommand
+    spatial_cluster_parser = subparsers.add_parser(
+        'spatial_cluster',
+        help='Cluster spatial neighborhood composition profiles',
+        description=(
+            'Build neighborhood composition vectors from spatial graph connectivity and '
+            'cell-type labels, then run k-means over a cluster-count sweep with silhouette scoring.'
+        ),
+    )
+    spatial_cluster.add_arguments(spatial_cluster_parser)
+    spatial_cluster_parser.set_defaults(func=spatial_cluster.main)
 
     # Add assign subcommand
     assign_parser = subparsers.add_parser(

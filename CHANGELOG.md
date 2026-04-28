@@ -13,11 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added support for CLI/config options including `spatial_key`, `table_key`, `library_key`, `library_id`, `n_neighs`, `radius`, `transform`, and `key_added`.
   - Added new core module `spatial_tk/core/spatial_neighbors.py` with radius parsing and Squidpy wrapper logic.
   - Added functional test `tests/functional/test_spatial_neighbors_command.py` to verify that spatial graph matrices persist in `obsp` after save/reload.
+- **Spatial neighborhood clustering subcommand**:
+  - Added `spatial-tk spatial_cluster` to cluster neighborhood cell-type composition vectors derived from spatial connectivities.
+  - Added support for configurable graph key, `cell_type_key`, output/result keys, k-means sweep bounds, and `--force-n-clusters`.
+  - Added new core module `spatial_tk/core/spatial_clustering.py` for composition construction, k-means sweep, silhouette/inertia scoring, and uns result schema.
 
 ### Changed
 - **CLI and docs**:
   - Registered `spatial_neighbors` in `spatial_tk/cli.py`.
+  - Registered `spatial_cluster` in `spatial_tk/cli.py`.
   - Added `[spatial_neighbors]` section to `example_config.toml`.
+  - Added `[spatial_cluster]` section to `example_config.toml`.
   - Updated `README.md` with command usage and examples.
 - **Table selection utilities**:
   - Updated `get_table()` and `set_table()` in `spatial_tk/utils/helpers.py` to support optional `table_key` selection.
