@@ -100,6 +100,33 @@ def test_full_pipeline_end_to_end(test_samples_csv, test_markers_csv, tmp_zarr_c
     csv_files = list(diff_output_dir.glob("*.csv"))
     assert len(csv_files) > 0, "No differential expression results found"
 
+    # Step 7: Spatial neighbors graph (inplace)
+    result = subprocess.run([
+        sys.executable, '-m', 'spatial_tk.cli',
+        'spatial_neighbors',
+        '--input', str(concat_output),
+        '--inplace',
+        '--spatial-key', 'spatial',
+        '--n-neighs', '6',
+        '--key-added', 'spatial'
+    ], capture_output=True, text=True)
+
+    assert result.returncode == 0, f"spatial_neighbors failed: {result.stderr}"
+
+    # Step 8: Spatial neighborhood clustering (inplace)
+    result = subprocess.run([
+        sys.executable, '-m', 'spatial_tk.cli',
+        'spatial_cluster',
+        '--input', str(concat_output),
+        '--inplace',
+        '--cell-type-key', 'cell_type_res0p5',
+        '--max-clusters', '20',
+        '--results-key', 'spatial_cluster',
+        '--output-key', 'spatial_cluster_id',
+    ], capture_output=True, text=True)
+
+    assert result.returncode == 0, f"spatial_cluster failed: {result.stderr}"
+
 
 @pytest.mark.slow
 def test_pipeline_with_group_comparison(test_samples_csv, tmp_zarr_cleanup):

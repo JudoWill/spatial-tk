@@ -47,6 +47,7 @@ dependencies = [
     
     # Scientific computing
     "scipy",
+    "scikit-learn",
     
     # Graph algorithms for clustering
     "igraph",

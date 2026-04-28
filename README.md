@@ -203,6 +203,80 @@ spatial-tk cluster --input data.zarr --inplace \
 - `--save-plots`: Generate UMAP plots
 - `--config`: Path to TOML configuration file (optional)
 
+### `spatial-tk spatial_neighbors`
+
+Build a spatial graph on coordinates using Squidpy.
+
+```bash
+# kNN graph on obsm['spatial']
+spatial-tk spatial_neighbors --input data.zarr --inplace \
+  --spatial-key spatial --n-neighs 8
+
+# Radius-based graph with cosine transform, writing to new file
+spatial-tk spatial_neighbors --input data.zarr --output neighbors.zarr \
+  --coord-type generic --radius 50,200 --transform cosine
+```
+
+**Arguments:**
+- `--input`: Input .zarr file
+- `--output`: Output .zarr file (mutually exclusive with --inplace)
+- `--inplace`: Modify input file in place
+- `--table-key`: Optional table key in `SpatialData.tables`
+- `--spatial-key`: Coordinate key in `adata.obsm` (default: `spatial`)
+- `--library-key`: Optional obs column containing library ids
+- `--library-id`: Optional single-library convenience value
+- `--coord-type`: `grid` or `generic` (default: inferred by Squidpy)
+- `--n-neighs`: Number of neighbors (default: 6)
+- `--radius`: Scalar radius or `min,max` interval
+- `--transform`: `spectral`, `cosine`, or `none`
+- `--key-added`: Output prefix in `adata.obsp`/`adata.uns` (default: `spatial`)
+- `--config`: Path to TOML configuration file (optional)
+
+### `spatial-tk spatial_cluster`
+
+Cluster cells into spatial neighborhoods based on local cell-type composition vectors.
+
+```bash
+# Use existing spatial graph and choose best K by silhouette
+spatial-tk spatial_cluster --input data.zarr --inplace \
+  --cell-type-key cell_type_res0p5 --max-clusters 20
+
+# Force final cluster count while still saving full K sweep
+spatial-tk spatial_cluster --input data.zarr --inplace \
+  --cell-type-key cell_type_res0p5 --force-n-clusters 12
+
+# Use HDBSCAN mode instead of k-means
+spatial-tk spatial_cluster --input data.zarr --inplace \
+  --cell-type-key cell_type_res0p5 --mode hdbscan \
+  --hdbscan-min-cluster-size 8 --hdbscan-min-samples 4
+```
+
+**Arguments:**
+- `--input`: Input .zarr file
+- `--output`: Output .zarr file (mutually exclusive with --inplace)
+- `--inplace`: Modify input file in place
+- `--table-key`: Optional table key in `SpatialData.tables`
+- `--cell-type-key`: Required `adata.obs` column with cell-type labels
+- `--connectivities-key`: `adata.obsp` graph key (default: `spatial_connectivities`)
+- `--neighbor-k`: Compute neighbors on demand if `--connectivities-key` is missing
+- `--spatial-key`: Coordinate key for on-demand neighbor calculation (default: `spatial`)
+- `--library-key`: Optional obs library key for on-demand neighbors
+- `--output-key`: Output obs column for selected labels (default: `spatial_cluster`)
+- `--results-key`: `adata.uns` key for detailed outputs (default: `spatial_cluster`)
+- `--mode`: Clustering mode: `kmeans` (default) or `hdbscan`
+- `--min-clusters`: Minimum cluster count to test (default: 2)
+- `--max-clusters`: Maximum cluster count to test (default: 20)
+- `--force-n-clusters`: Force final selected cluster count (k-means mode only)
+- `--random-state`: Random seed for reproducibility (default: 0)
+- `--hdbscan-min-cluster-size`: HDBSCAN minimum cluster size
+- `--hdbscan-min-samples`: HDBSCAN `min_samples`
+- `--hdbscan-cluster-selection-epsilon`: HDBSCAN cluster selection epsilon
+- `--hdbscan-metric`: HDBSCAN distance metric
+- `--hdbscan-allow-single-cluster`: Allow one-cluster HDBSCAN solution
+- `--include-self`/`--exclude-self`: Include/exclude focal cell in neighborhood window
+- `--normalize-composition`/`--raw-composition`: Store proportions or raw counts
+- `--config`: Path to TOML configuration file (optional)
+
 ### `spatial-tk annotate`
 
 Annotate cell types using marker genes and/or MLM scoring.

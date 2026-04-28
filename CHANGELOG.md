@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Spatial neighbors subcommand**:
+  - Added `spatial-tk spatial_neighbors` to build Squidpy spatial graphs from existing `.zarr` datasets.
+  - Added support for CLI/config options including `spatial_key`, `table_key`, `library_key`, `library_id`, `n_neighs`, `radius`, `transform`, and `key_added`.
+  - Added new core module `spatial_tk/core/spatial_neighbors.py` with radius parsing and Squidpy wrapper logic.
+  - Added functional test `tests/functional/test_spatial_neighbors_command.py` to verify that spatial graph matrices persist in `obsp` after save/reload.
+- **Spatial neighborhood clustering subcommand**:
+  - Added `spatial-tk spatial_cluster` to cluster neighborhood cell-type composition vectors derived from spatial connectivities.
+  - Added support for configurable graph key, `cell_type_key`, output/result keys, k-means sweep bounds, and `--force-n-clusters`.
+  - Added `--mode` with `kmeans` and `hdbscan` options for alternative clustering backends.
+  - Added HDBSCAN options (`hdbscan_min_cluster_size`, `hdbscan_min_samples`, `hdbscan_cluster_selection_epsilon`, `hdbscan_metric`, `hdbscan_allow_single_cluster`) and mode-specific result fields in `uns`.
+  - Added new core module `spatial_tk/core/spatial_clustering.py` for composition construction, k-means sweep, silhouette/inertia scoring, and uns result schema.
+
+### Changed
+- **CLI and docs**:
+  - Registered `spatial_neighbors` in `spatial_tk/cli.py`.
+  - Registered `spatial_cluster` in `spatial_tk/cli.py`.
+  - Added `[spatial_neighbors]` section to `example_config.toml`.
+  - Added `[spatial_cluster]` section to `example_config.toml`.
+  - Updated `README.md` with command usage and examples.
+- **Table selection utilities**:
+  - Updated `get_table()` and `set_table()` in `spatial_tk/utils/helpers.py` to support optional `table_key` selection.
+- **End-to-end pipeline test**:
+  - Extended `tests/functional/test_full_pipeline.py` to include `spatial_neighbors` as step 7 in the full pipeline flow.
+
 ### Changed (breaking)
 
 - Renamed the Python package from `xenium_process` to `spatial_tk`, the distribution/PyPI name from `xenium-process` to `spatial-tk`, and the CLI entry point from `xenium_process` to `spatial-tk`. Run `pip install spatial-tk` (or install from source) and invoke `spatial-tk ...` or `python -m spatial_tk.cli ...`.

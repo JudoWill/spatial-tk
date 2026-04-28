@@ -44,6 +44,74 @@ leiden_resolution = "0.2,0.5,1.0"
 # Generate and save UMAP plots
 save_plots = true
 
+[spatial_neighbors]
+# Path to input .zarr file
+input = "clustered.zarr"
+# Modify the input file in place instead of creating a new file
+inplace = false
+# Path to output .zarr file (required unless inplace = true)
+output = "neighbors.zarr"
+# Optional table key from SpatialData.tables (null = first table)
+table_key = null
+# obsm key containing spatial coordinates
+spatial_key = "spatial"
+# Optional obs column containing per-cell library ids
+library_key = null
+# Optional single-library identifier convenience value
+library_id = null
+# Coordinate type: "grid", "generic", or null to let Squidpy infer
+coord_type = null
+# Number of neighbors for generic coordinates
+n_neighs = 6
+# Radius threshold as scalar or "min,max" string; null disables radius filtering
+radius = null
+# Transform adjacency matrix: "spectral", "cosine", or null
+transform = null
+# Prefix for output graph keys in obsp/uns
+key_added = "spatial"
+
+[spatial_cluster]
+# Path to input .zarr file
+input = "neighbors.zarr"
+# Modify the input file in place instead of creating a new file
+inplace = false
+# Path to output .zarr file (required unless inplace = true)
+output = "spatial_clustered.zarr"
+# Optional table key from SpatialData.tables (null = first table)
+table_key = null
+# obs column containing cell-type labels used in neighborhood composition vectors
+cell_type_key = "cell_type_res0p5"
+# Connectivity matrix key in obsp, usually created by spatial_neighbors
+connectivities_key = "spatial_connectivities"
+# If connectivities_key is missing, compute neighbors on demand with this k
+neighbor_k = null
+# Spatial key and library key are used only when computing neighbors on demand
+spatial_key = "spatial"
+library_key = null
+# Output obs column for selected spatial cluster labels
+output_key = "spatial_cluster"
+# uns key for detailed results
+results_key = "spatial_cluster"
+# Clustering mode: "kmeans" or "hdbscan"
+mode = "kmeans"
+# K-means sweep bounds
+min_clusters = 2
+max_clusters = 20
+# Optional override for final selected cluster count
+force_n_clusters = null
+# Random seed for reproducibility
+random_state = 0
+# HDBSCAN parameters (used when mode = "hdbscan")
+hdbscan_min_cluster_size = 5
+hdbscan_min_samples = null
+hdbscan_cluster_selection_epsilon = 0.0
+hdbscan_metric = "euclidean"
+hdbscan_allow_single_cluster = false
+# Include each focal cell in its own neighborhood vector
+include_self = true
+# Normalize neighborhood vectors to cell-type proportions
+normalize_composition = true
+
 [quantitate]
 # Path to input clustered .zarr file
 input = "clustered.zarr"

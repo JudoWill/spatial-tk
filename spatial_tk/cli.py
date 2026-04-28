@@ -13,7 +13,16 @@ import warnings
 # Suppress warnings
 warnings.filterwarnings('ignore', category=FutureWarning)
 
-from spatial_tk.commands import concat, normalize, cluster, quantitate, assign, differential
+from spatial_tk.commands import (
+    concat,
+    normalize,
+    cluster,
+    quantitate,
+    spatial_neighbors,
+    spatial_cluster,
+    assign,
+    differential,
+)
 from spatial_tk.utils.helpers import setup_logging
 
 
@@ -50,6 +59,14 @@ Examples:
   # Assign cell type labels to clusters from the computed scores
   spatial-tk assign --input clustered.zarr --inplace \\
       --score-key score_mlm_custom
+
+  # Build a Squidpy spatial neighbors graph
+  spatial-tk spatial_neighbors --input clustered.zarr --inplace \\
+      --spatial-key spatial --n-neighs 8 --transform cosine
+
+  # Cluster neighborhood compositions from spatial neighbor graph
+  spatial-tk spatial_cluster --input clustered.zarr --inplace \\
+      --cell-type-key cell_type_res0p5 --max-clusters 20
 
   # Differential analysis between groups
   spatial-tk differential --input annotated.zarr --output-dir results/ \\
@@ -113,6 +130,30 @@ Examples:
     )
     quantitate.add_arguments(quantitate_parser)
     quantitate_parser.set_defaults(func=quantitate.main)
+
+    # Add spatial_neighbors subcommand
+    spatial_neighbors_parser = subparsers.add_parser(
+        'spatial_neighbors',
+        help='Compute spatial neighbor graph with Squidpy',
+        description=(
+            'Build spatial connectivities/distances with squidpy.gr.spatial_neighbors '
+            'using configurable spatial key, neighbor definition, and transform.'
+        ),
+    )
+    spatial_neighbors.add_arguments(spatial_neighbors_parser)
+    spatial_neighbors_parser.set_defaults(func=spatial_neighbors.main)
+
+    # Add spatial_cluster subcommand
+    spatial_cluster_parser = subparsers.add_parser(
+        'spatial_cluster',
+        help='Cluster spatial neighborhood composition profiles',
+        description=(
+            'Build neighborhood composition vectors from spatial graph connectivity and '
+            'cell-type labels, then run k-means over a cluster-count sweep with silhouette scoring.'
+        ),
+    )
+    spatial_cluster.add_arguments(spatial_cluster_parser)
+    spatial_cluster_parser.set_defaults(func=spatial_cluster.main)
 
     # Add assign subcommand
     assign_parser = subparsers.add_parser(
