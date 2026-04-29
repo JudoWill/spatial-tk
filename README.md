@@ -470,14 +470,20 @@ done
 # Install with dev dependencies
 pip install -e ".[dev]"
 
-# Run all tests
-pytest
+# Run all tests with full external datasets
+make test
 
 # Run only unit tests (fast)
-pytest tests/unit/
+make test-unit
 
-# Run only functional tests (slower, requires test data)
-pytest tests/functional/
+# Run functional tests with ROI fixtures
+make test-functional
+
+# Run functional tests with ROI fixtures (default fast tier)
+SPATIAL_TK_TEST_TIER=fast pytest tests/functional/
+
+# Run functional tests with full external datasets
+SPATIAL_TK_TEST_TIER=full pytest tests/functional/
 
 # Run with coverage
 pytest --cov=spatial_tk --cov-report=html
@@ -490,6 +496,43 @@ python scripts/create_test_data.py \
   --input-csv example.csv \
   --output-dir tests/test_data \
   --n-cells 500
+```
+
+### Functional Test Data Tiers
+
+Functional tests support two sample manifests via `tests/conftest.py`:
+
+- **Fast tier** (default): `tests/test_data/test_samples_fast.csv`
+  - Uses in-repo ROI fixtures under `tests/test_data/rois/`.
+  - Also mirrored in `tests/test_data/test_samples.csv` for compatibility.
+- **Full tier**: `tests/test_data/test_samples_full.csv`
+  - Uses full-size external `.zarr` paths (for slower validation runs).
+
+Environment variables:
+
+- `SPATIAL_TK_TEST_TIER=fast|full` chooses the tier (default: `fast`).
+- `SPATIAL_TK_FAST_SAMPLES_CSV=/path/to/custom.csv` overrides fast manifest path.
+- `SPATIAL_TK_FULL_SAMPLES_CSV=/path/to/custom.csv` overrides full manifest path.
+
+Makefile shortcuts:
+
+- `make test` runs full-suite tests with `SPATIAL_TK_TEST_TIER=full`.
+- `make test-unit` runs only unit tests.
+- `make test-functional` runs functional tests with `SPATIAL_TK_TEST_TIER=fast` (ROI fixtures).
+
+### Generating ROI Subset Fixtures
+
+Use `tests/test_data/generate_roi_subsets.py` to generate ROI `.zarr` subsets from a single input `.zarr`:
+
+```bash
+python tests/test_data/generate_roi_subsets.py \
+  --input-zarr /path/to/source.zarr \
+  --output-dir tests/test_data/roi_generation \
+  --sample-name SampleA \
+  --n-rois 5 \
+  --min-cells 1000 \
+  --max-cells 5000 \
+  --overwrite
 ```
 
 ### Building Package

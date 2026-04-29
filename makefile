@@ -9,9 +9,9 @@ help:
 	@echo "  make install           - Install package in current environment"
 	@echo "  make install-dev       - Install package with dev dependencies"
 	@echo "  make build             - Build distribution packages"
-	@echo "  make test              - Run all tests (uses .pytest_tmp/ for temp files)"
+	@echo "  make test              - Run all tests using full external datasets"
 	@echo "  make test-unit         - Run only unit tests (fast)"
-	@echo "  make test-functional   - Run only functional tests (slower)"
+	@echo "  make test-functional   - Run functional tests with ROI fixtures"
 	@echo "  make test-coverage     - Run tests with coverage report"
 	@echo "  make create-test-data  - Generate subsampled test data"
 	@echo "  make clean-test        - Clean up test temporary files"
@@ -43,7 +43,7 @@ build:
 
 # Run all tests (with custom temp directory on larger partition)
 test:
-	pytest -v --basetemp=.pytest_tmp
+	SPATIAL_TK_TEST_TIER=full pytest -v --basetemp=.pytest_tmp
 
 # Run only unit tests
 test-unit:
@@ -51,7 +51,7 @@ test-unit:
 
 # Run only functional tests
 test-functional:
-	pytest tests/functional/ -v --basetemp=.pytest_tmp
+	SPATIAL_TK_TEST_TIER=fast pytest tests/functional/ -v --basetemp=.pytest_tmp
 
 # Run tests with coverage
 test-coverage:

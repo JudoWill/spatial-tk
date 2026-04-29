@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **ROI fixture generator script for tests**:
+  - Added `tests/test_data/generate_roi_subsets.py` to generate ROI subset `.zarr` files from a single input `.zarr`.
+  - Supports configurable ROI count, target cell ranges, coordinate system, overlap/distance constraints, and manifest output for test ingestion.
+- **Tiered functional test sample manifests**:
+  - Added `tests/test_data/test_samples_fast.csv` for in-repo ROI-based functional testing.
+  - Added `tests/test_data/test_samples_full.csv` for full-size out-of-repo functional testing.
 - **Spatial neighbors subcommand**:
   - Added `spatial-tk spatial_neighbors` to build Squidpy spatial graphs from existing `.zarr` datasets.
   - Added support for CLI/config options including `spatial_key`, `table_key`, `library_key`, `library_id`, `n_neighs`, `radius`, `transform`, and `key_added`.
@@ -21,6 +27,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added new core module `spatial_tk/core/spatial_clustering.py` for composition construction, k-means sweep, silhouette/inertia scoring, and uns result schema.
 
 ### Changed
+- **Functional test fixture routing**:
+  - Updated `tests/conftest.py` `test_samples_csv` fixture to select fast/full manifests using `SPATIAL_TK_TEST_TIER` (`fast` default, `full` optional).
+  - Added optional manifest overrides: `SPATIAL_TK_FAST_SAMPLES_CSV` and `SPATIAL_TK_FULL_SAMPLES_CSV`.
+  - Updated `subsampled_zarr_path` fixture to use ROI fixtures from `tests/test_data/rois/`.
+- **Test data layout**:
+  - Moved ROI test fixtures from temporary workspace paths into `tests/test_data/rois/`.
+  - Replaced `tests/test_data/test_samples.csv` entries to reference ROI fixtures in `tests/test_data/rois/`.
+  - Removed legacy `tests/test_data/subsampled_*.zarr` fixtures in favor of ROI and external full-data manifests.
+- **Pytest marker registration**:
+  - Added marker declarations in `pyproject.toml` for `slow`, `functional_fast`, and `functional_full`.
+- **Makefile test target behavior**:
+  - Updated `make test` to run with `SPATIAL_TK_TEST_TIER=full` (full external datasets).
+  - Kept `make test-unit` as quick unit-only tests.
+  - Updated `make test-functional` to run with `SPATIAL_TK_TEST_TIER=fast` (ROI fixtures).
 - **CLI and docs**:
   - Registered `spatial_neighbors` in `spatial_tk/cli.py`.
   - Registered `spatial_cluster` in `spatial_tk/cli.py`.
