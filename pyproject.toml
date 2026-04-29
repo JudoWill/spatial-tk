@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
-    {name = "Hope Lab", email = "hope@lab.edu"}
+    {name = "Will Dampier", email = "wnd22@drexel.edu"}
 ]
 keywords = ["spatial transcriptomics", "xenium", "single-cell", "bioinformatics"]
 classifiers = [
@@ -83,6 +83,11 @@ python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
 addopts = "-v --tb=short"
+markers = [
+    "slow: tests that run on full external datasets",
+    "functional_fast: functional tests intended for ROI fixtures",
+    "functional_full: functional tests intended for full external fixtures",
+]
 # Use custom temp directory to avoid filling up /tmp
 # This directory should be on a partition with more space
 tmp_path_retention_count = 0

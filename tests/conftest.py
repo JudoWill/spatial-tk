@@ -2,6 +2,7 @@
 Pytest fixtures for spatial_tk tests.
 """
 
+import os
 import pytest
 from pathlib import Path
 import numpy as np
@@ -28,8 +29,21 @@ def test_data_dir():
 
 @pytest.fixture
 def test_samples_csv(test_data_dir):
-    """Return path to test samples CSV."""
-    return test_data_dir / "test_samples.csv"
+    """
+    Return path to samples CSV for the selected test tier.
+
+    Tiers:
+      - fast (default): in-repo ROI fixtures
+      - full: out-of-repo full-size zarr fixtures
+    """
+    tier = os.getenv("SPATIAL_TK_TEST_TIER", "fast").strip().lower()
+
+    if tier == "full":
+        override = os.getenv("SPATIAL_TK_FULL_SAMPLES_CSV")
+        return Path(override) if override else test_data_dir / "test_samples_full.csv"
+
+    override = os.getenv("SPATIAL_TK_FAST_SAMPLES_CSV")
+    return Path(override) if override else test_data_dir / "test_samples_fast.csv"
 
 
 @pytest.fixture
@@ -104,8 +118,8 @@ def mock_markers():
 
 @pytest.fixture
 def subsampled_zarr_path(test_data_dir):
-    """Return path to first subsampled zarr file."""
-    zarr_files = list(test_data_dir.glob("subsampled_*.zarr"))
+    """Return path to first available ROI zarr fixture."""
+    zarr_files = list((test_data_dir / "rois").glob("*.zarr"))
     if zarr_files:
         return zarr_files[0]
     return None
